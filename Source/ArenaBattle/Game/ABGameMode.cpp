@@ -3,18 +3,20 @@
 
 #include "Game/ABGameMode.h"
 //#include "Player/ABPlayerController.h"
+//#include "Character/ABCharacterPlayer.h"
 
 AABGameMode::AABGameMode()
 {
 	// Search a blueprint character asset.
-	static ConstructorHelpers::FClassFinder<APawn> ThirdPersonClassRef(
-		TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter.BP_ThirdPersonCharacter_C")
+	static ConstructorHelpers::FClassFinder<APawn> ABCharacterClassRef(
+		TEXT("/Script/ArenaBattle.ABCharacterPlayer")
 	);
 
-	if (ThirdPersonClassRef.Succeeded())
+	if (ABCharacterClassRef.Succeeded())
 	{
 		// Set Default Pawn Class.
-		DefaultPawnClass = ThirdPersonClassRef.Class;
+		DefaultPawnClass = ABCharacterClassRef.Class;
+		//DefaultPawnClass = AABCharacterPlayer::StaticClass();
 	}
 
 	// Set Default Pawn Class.
