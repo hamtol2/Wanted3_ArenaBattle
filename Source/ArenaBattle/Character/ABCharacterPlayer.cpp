@@ -8,6 +8,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 
+#include "InputMappingContext.h"
+#include "InputAction.h"
 
 AABCharacterPlayer::AABCharacterPlayer()
 {
@@ -51,6 +53,31 @@ AABCharacterPlayer::AABCharacterPlayer()
 	// Camera 컴포넌트 생성 및 설정.
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+
+	// 입력 설정.
+	static ConstructorHelpers::FObjectFinder<UInputMappingContext> DefaultMappingContextRef(TEXT("/Game/ArenaBattle/Input/IMC_Default.IMC_Default"));
+	if (DefaultMappingContextRef.Succeeded())
+	{
+		DefaultMappingContext = DefaultMappingContextRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_Move.IA_Move"));
+	if (MoveActionRef.Succeeded())
+	{
+		MoveAction = MoveActionRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> LookActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_Look.IA_Look"));
+	if (LookActionRef.Succeeded())
+	{
+		LookAction = LookActionRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> JumpActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_Jump.IA_Jump"));
+	if (JumpActionRef.Succeeded())
+	{
+		JumpAction = JumpActionRef.Object;
+	}
 }
 
 void AABCharacterPlayer::BeginPlay()
