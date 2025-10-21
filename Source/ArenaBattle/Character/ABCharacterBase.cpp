@@ -2,6 +2,8 @@
 
 
 #include "Character/ABCharacterBase.h"
+#include "ABCharacterControlData.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
@@ -9,26 +11,41 @@ AABCharacterBase::AABCharacterBase()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-}
-
-// Called when the game starts or when spawned
-void AABCharacterBase::BeginPlay()
-{
-	Super::BeginPlay();
+	// 캐릭터 컨트롤 데이터 애셋 검색 후 설정.
+	static ConstructorHelpers::FObjectFinder<UABCharacterControlData> ShoulderDataRef(TEXT("/Game/ArenaBattle/CharacterControl/ABC_Shoulder.ABC_Shoulder"));
+	if (ShoulderDataRef.Succeeded())
+	{
+		CharacterControlManager.Add(
+			ECharacterControlType::Shoulder,
+			ShoulderDataRef.Object
+		);
+	}
 	
+	static ConstructorHelpers::FObjectFinder<UABCharacterControlData> QuaterDataRef(TEXT("/Game/ArenaBattle/CharacterControl/ABC_Quater.ABC_Quater"));
+	if (QuaterDataRef.Succeeded())
+	{
+		CharacterControlManager.Add(
+			ECharacterControlType::Quater,
+			QuaterDataRef.Object
+		);
+	}
 }
 
-// Called every frame
-void AABCharacterBase::Tick(float DeltaTime)
+void AABCharacterBase::SetCharacterControlData(
+	const UABCharacterControlData* InCharacterControlData
+)
 {
-	Super::Tick(DeltaTime);
+	// Pawn.
+	bUseControllerRotationYaw 
+		= InCharacterControlData->bUseContollerRotationYaw;
 
+	// CharacterMovement.
+	GetCharacterMovement()->bOrientRotationToMovement
+		= InCharacterControlData->bOrientRotationToMovement;
+
+	GetCharacterMovement()->bUseControllerDesiredRotation
+		= InCharacterControlData->bUseControllerDesiredRotation;
+
+	GetCharacterMovement()->RotationRate
+		= InCharacterControlData->RotationRate;
 }
-
-// Called to bind functionality to input
-void AABCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-

@@ -13,6 +13,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 
+#include "ABCharacterControlData.h"
+
 AABCharacterPlayer::AABCharacterPlayer()
 {
 	// 기본 컴포넌트 설정.
@@ -57,22 +59,22 @@ AABCharacterPlayer::AABCharacterPlayer()
 	Camera->SetupAttachment(SpringArm);
 
 	// 입력 설정.
-	static ConstructorHelpers::FObjectFinder<UInputMappingContext> DefaultMappingContextRef(TEXT("/Game/ArenaBattle/Input/IMC_Default.IMC_Default"));
-	if (DefaultMappingContextRef.Succeeded())
-	{
-		DefaultMappingContext = DefaultMappingContextRef.Object;
-	}
-
-	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_Move.IA_Move"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_ShoulerMove.IA_ShoulerMove"));
 	if (MoveActionRef.Succeeded())
 	{
-		MoveAction = MoveActionRef.Object;
+		ShoulderMoveAction = MoveActionRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> LookActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_Look.IA_Look"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> LookActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_ShoulderLook.IA_ShoulderLook"));
 	if (LookActionRef.Succeeded())
 	{
-		LookAction = LookActionRef.Object;
+		ShoulderLookAction = LookActionRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> QuaterMoveActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_QuaterMove.IA_QuaterMove"));
+	if (QuaterMoveActionRef.Succeeded())
+	{
+		QuaterMoveAction = QuaterMoveActionRef.Object;
 	}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> JumpActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_Jump.IA_Jump"));
@@ -80,27 +82,23 @@ AABCharacterPlayer::AABCharacterPlayer()
 	{
 		JumpAction = JumpActionRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> ChangeControlActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_ChangeControl.IA_ChangeControl"));
+	if (ChangeControlActionRef.Succeeded())
+	{
+		ChangeControlAction = ChangeControlActionRef.Object;
+	}
+
+	// 초기 캐릭터 컨트롤 타입 설정.
+	CurrentChracterControlType = ECharacterControlType::Quater;
 }
 
 void AABCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 향상된 입력 시스템 객체 얻어오기.
-	APlayerController* PlayerController
-		= Cast<APlayerController>(GetController());
-	if (PlayerController)
-	{
-		UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
-			PlayerController->GetLocalPlayer()
-		);
-
-		// 사용할 입력 매핑 컨텍스트 등록.
-		if (InputSystem)
-		{
-			InputSystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
+	// 초기 입력 컨트롤 설정.
+	SetCharacterControl(CurrentChracterControlType);
 }
 
 void AABCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -113,17 +111,24 @@ void AABCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	{
 		// 입력 바인딩(연결).
 		EnhancedInputComponent->BindAction(
-			MoveAction,
+			ShoulderMoveAction,
 			ETriggerEvent::Triggered,
 			this,
-			&AABCharacterPlayer::Move
+			&AABCharacterPlayer::ShoulderMove
 		);
 
 		EnhancedInputComponent->BindAction(
-			LookAction,
+			ShoulderLookAction,
 			ETriggerEvent::Triggered,
 			this,
-			&AABCharacterPlayer::Look
+			&AABCharacterPlayer::ShoulderLook
+		);
+
+		EnhancedInputComponent->BindAction(
+			QuaterMoveAction,
+			ETriggerEvent::Triggered,
+			this,
+			&AABCharacterPlayer::QuaterMove
 		);
 
 		EnhancedInputComponent->BindAction(
@@ -139,10 +144,102 @@ void AABCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 			this,
 			&ACharacter::StopJumping
 		);
+
+		EnhancedInputComponent->BindAction(
+			ChangeControlAction,
+			ETriggerEvent::Started,
+			this,
+			&AABCharacterPlayer::ChangeCharacterControl
+		);
 	}
 }
 
-void AABCharacterPlayer::Move(const FInputActionValue& Value)
+// 캐릭터 컨트롤 변경할 때 사용할 편의 함수.
+void AABCharacterPlayer::SetCharacterControl(
+	ECharacterControlType NewCharacterControlType)
+{
+	// 변경할 컨트롤 데이터 애셋 로드.
+	UABCharacterControlData* NewCharacterControl
+		= CharacterControlManager[NewCharacterControlType];
+	check(NewCharacterControl);
+
+	// 데이터 애셋을 전달해 함수 호출.
+	SetCharacterControlData(NewCharacterControl);
+
+	// 입력 매핑 컨텍스트 관련 처리.
+	// 향상된 입력 시스템 객체 얻어오기.
+	APlayerController* PlayerController
+		= Cast<APlayerController>(GetController());
+	if (PlayerController)
+	{
+		UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(
+			PlayerController->GetLocalPlayer()
+		);
+
+		// 사용할 입력 매핑 컨텍스트 등록.
+		if (InputSystem)
+		{
+			// 기존에 설정된 매핑 제거.
+			InputSystem->ClearAllMappings();
+
+			// 새로운 입력 매핑 컨텍스트 추가.
+			InputSystem->AddMappingContext(
+				NewCharacterControl->InputMappingContext,
+				0
+			);
+		}
+	}
+}
+
+// 컨트롤 데이터 설정.
+void AABCharacterPlayer::SetCharacterControlData(
+	const UABCharacterControlData* InCharacterControlData)
+{
+	Super::SetCharacterControlData(InCharacterControlData);
+
+	// SpringArm 관련 설정.
+	SpringArm->TargetArmLength
+		= InCharacterControlData->TargetArmLength;
+
+	SpringArm->SetRelativeRotation(
+		InCharacterControlData->RelativeRotation
+	);
+
+	SpringArm->bDoCollisionTest 
+		= InCharacterControlData->bDoCollisionTest;
+
+	SpringArm->bUsePawnControlRotation
+		= InCharacterControlData->bUsePawnControlRotation;
+
+	SpringArm->bInheritPitch
+		= InCharacterControlData->bInheritPitch;
+
+	SpringArm->bInheritYaw 
+		= InCharacterControlData->bInheritYaw;
+	
+	SpringArm->bInheritRoll
+		= InCharacterControlData->bInheritRoll;
+}
+
+void AABCharacterPlayer::ChangeCharacterControl()
+{
+	// 사용할 캐릭터 컨트롤을 변경.
+	// 조건이 두개일때 if/else 보다는 if/else if로 확인하고, else는 예외처리로.
+	if (CurrentChracterControlType == ECharacterControlType::Quater)
+	{
+		SetCharacterControl(ECharacterControlType::Shoulder);
+	}
+	else if (CurrentChracterControlType == ECharacterControlType::Shoulder)
+	{
+		SetCharacterControl(ECharacterControlType::Quater);
+	}
+	//else
+	//{
+	//	// 예외처리.
+	//}
+}
+
+void AABCharacterPlayer::ShoulderMove(const FInputActionValue& Value)
 {
 	// 입력 값 읽어오기.
 	FVector2D Movement = Value.Get<FVector2D>();
@@ -166,7 +263,7 @@ void AABCharacterPlayer::Move(const FInputActionValue& Value)
 	AddMovementInput(RightVector, Movement.X);
 }
 
-void AABCharacterPlayer::Look(const FInputActionValue& Value)
+void AABCharacterPlayer::ShoulderLook(const FInputActionValue& Value)
 {
 	// 입력 값 읽어오기.
 	FVector2D LookValue = Value.Get<FVector2D>();
@@ -178,4 +275,10 @@ void AABCharacterPlayer::Look(const FInputActionValue& Value)
 
 	// 마우스 좌우 드래그 입력을 컨트롤러의 Y축 회전(피치, Pitch)에 적용.
 	AddControllerPitchInput(LookValue.Y);
+}
+
+void AABCharacterPlayer::QuaterMove(const FInputActionValue& Value)
+{
+	// 쿼터뷰 일 때 이동로직 처리.
+
 }
