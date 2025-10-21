@@ -295,6 +295,11 @@ void AABCharacterPlayer::QuaterMove(const FInputActionValue& Value)
 	// 이동 단위 벡터 만들기.
 	MoveDirection.Normalize();
 
+	// 캐릭터가 이동하는 방향에 맞게 컨트롤러 회전 설정.
+	Controller->SetControlRotation(
+		FRotationMatrix::MakeFromX(MoveDirection).Rotator()
+	);
+
 	// 이동 적용.
 	AddMovementInput(MoveDirection, MovementVectorSize);
 }
