@@ -59,7 +59,7 @@ AABCharacterPlayer::AABCharacterPlayer()
 	Camera->SetupAttachment(SpringArm);
 
 	// 입력 설정.
-	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_ShoulerMove.IA_ShoulerMove"));
+	static ConstructorHelpers::FObjectFinder<UInputAction> MoveActionRef(TEXT("/Game/ArenaBattle/Input/Actions/IA_ShoulderMove.IA_ShoulderMove"));
 	if (MoveActionRef.Succeeded())
 	{
 		ShoulderMoveAction = MoveActionRef.Object;
@@ -90,7 +90,7 @@ AABCharacterPlayer::AABCharacterPlayer()
 	}
 
 	// 초기 캐릭터 컨트롤 타입 설정.
-	CurrentChracterControlType = ECharacterControlType::Quater;
+	CurrentCharacterControlType = ECharacterControlType::Quater;
 }
 
 void AABCharacterPlayer::BeginPlay()
@@ -98,7 +98,7 @@ void AABCharacterPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	// 초기 입력 컨트롤 설정.
-	SetCharacterControl(CurrentChracterControlType);
+	SetCharacterControl(CurrentCharacterControlType);
 }
 
 void AABCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -189,6 +189,9 @@ void AABCharacterPlayer::SetCharacterControl(
 			);
 		}
 	}
+
+	// 열거형 값 업데이트.
+	CurrentCharacterControlType = NewCharacterControlType;
 }
 
 // 컨트롤 데이터 설정.
@@ -225,11 +228,11 @@ void AABCharacterPlayer::ChangeCharacterControl()
 {
 	// 사용할 캐릭터 컨트롤을 변경.
 	// 조건이 두개일때 if/else 보다는 if/else if로 확인하고, else는 예외처리로.
-	if (CurrentChracterControlType == ECharacterControlType::Quater)
+	if (CurrentCharacterControlType == ECharacterControlType::Quater)
 	{
 		SetCharacterControl(ECharacterControlType::Shoulder);
 	}
-	else if (CurrentChracterControlType == ECharacterControlType::Shoulder)
+	else if (CurrentCharacterControlType == ECharacterControlType::Shoulder)
 	{
 		SetCharacterControl(ECharacterControlType::Quater);
 	}
@@ -280,5 +283,18 @@ void AABCharacterPlayer::ShoulderLook(const FInputActionValue& Value)
 void AABCharacterPlayer::QuaterMove(const FInputActionValue& Value)
 {
 	// 쿼터뷰 일 때 이동로직 처리.
+	// 입력 값 읽어오기.
+	FVector2D Movement = Value.Get<FVector2D>();
 
+	// 입력 값을 사용해 이동 방향 만들기.
+	FVector MoveDirection(Movement.Y, Movement.X, 0.0f);
+
+	// 입력의 크기.
+	float MovementVectorSize = FMath::Min(1.0f, Movement.Size());
+
+	// 이동 단위 벡터 만들기.
+	MoveDirection.Normalize();
+
+	// 이동 적용.
+	AddMovementInput(MoveDirection, MovementVectorSize);
 }

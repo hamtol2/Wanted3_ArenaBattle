@@ -78,5 +78,5 @@ protected:
 
 	// 현재 사용 중인 캐릭터 컨트롤 타입 변수.
 	UPROPERTY(VisibleAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
-	ECharacterControlType CurrentChracterControlType;
+	ECharacterControlType CurrentCharacterControlType;
 };
