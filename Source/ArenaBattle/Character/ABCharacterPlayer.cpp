@@ -169,6 +169,13 @@ void AABCharacterPlayer::Move(const FInputActionValue& Value)
 void AABCharacterPlayer::Look(const FInputActionValue& Value)
 {
 	// 입력 값 읽어오기.
+	FVector2D LookValue = Value.Get<FVector2D>();
 
 	// 컨트롤러에 회전 적용.
+
+	// 마우스 좌우 드래그 입력을 컨트롤러의 Z축 회전(요, Yaw)에 적용.
+	AddControllerYawInput(LookValue.X);
+
+	// 마우스 좌우 드래그 입력을 컨트롤러의 Y축 회전(피치, Pitch)에 적용.
+	AddControllerPitchInput(LookValue.Y);
 }
