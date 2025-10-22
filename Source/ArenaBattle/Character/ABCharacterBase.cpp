@@ -32,8 +32,7 @@ AABCharacterBase::AABCharacterBase()
 }
 
 void AABCharacterBase::SetCharacterControlData(
-	const UABCharacterControlData* InCharacterControlData
-)
+	const UABCharacterControlData* InCharacterControlData)
 {
 	// Pawn.
 	bUseControllerRotationYaw 
