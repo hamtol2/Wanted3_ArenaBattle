@@ -11,7 +11,8 @@
  * 
  */
 UCLASS()
-class ARENABATTLE_API AABCharacterPlayer : public AABCharacterBase
+class ARENABATTLE_API AABCharacterPlayer 
+	: public AABCharacterBase
 {
 	GENERATED_BODY()
 	
@@ -46,6 +47,9 @@ protected:
 	// Quater 컨트롤일 때 이동 처리할 함수.
 	void QuaterMove(const FInputActionValue& Value);
 
+	// 공격 입력에 대응되는 함수.
+	void Attack();
+
 protected:
 
 	// 컴포넌트 구성.
@@ -69,6 +73,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> JumpAction;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> AttackAction;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> ChangeControlAction;
