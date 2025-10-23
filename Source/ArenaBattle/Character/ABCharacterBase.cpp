@@ -12,7 +12,7 @@
 // Sets default values
 AABCharacterBase::AABCharacterBase()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	// 컴포넌트 설정.
@@ -30,7 +30,7 @@ AABCharacterBase::AABCharacterBase()
 			ShoulderDataRef.Object
 		);
 	}
-	
+
 	static ConstructorHelpers::FObjectFinder<UABCharacterControlData> QuaterDataRef(TEXT("/Game/ArenaBattle/CharacterControl/ABC_Quater.ABC_Quater"));
 	if (QuaterDataRef.Succeeded())
 	{
@@ -54,13 +54,20 @@ AABCharacterBase::AABCharacterBase()
 		ComboActionData = ComboActionDataRef.Object;
 	}
 
+	// 죽음 몽타주 애셋 설정.
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadMontageRef(TEXT("/Game/ArenaBattle/Animation/AM_Dead.AM_Dead"));
+	if (DeadMontageRef.Succeeded())
+	{
+		DeadMontage = DeadMontageRef.Object;
+	}
+
 }
 
 void AABCharacterBase::SetCharacterControlData(
 	const UABCharacterControlData* InCharacterControlData)
 {
 	// Pawn.
-	bUseControllerRotationYaw 
+	bUseControllerRotationYaw
 		= InCharacterControlData->bUseContollerRotationYaw;
 
 	// CharacterMovement.
@@ -72,6 +79,22 @@ void AABCharacterBase::SetCharacterControlData(
 
 	GetCharacterMovement()->RotationRate
 		= InCharacterControlData->RotationRate;
+}
+
+float AABCharacterBase::TakeDamage(
+	float DamageAmount,
+	FDamageEvent const& DamageEvent,
+	AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	/*float AppliedDamage = */Super::TakeDamage(
+		DamageAmount, DamageEvent, EventInstigator, DamageCauser
+	);
+
+	// @Test: 바로 죽음 처리.
+	SetDead();
+
+	return DamageAmount;
 }
 
 void AABCharacterBase::ProcessComboCommand()
@@ -114,7 +137,9 @@ void AABCharacterBase::ComboActionBegin()
 		const float AttackSppedRate = 1.0f;
 
 		// 몽타주 재생 함수.
-		AnimInstance->Montage_Play(ComboActionMontage, AttackSppedRate);
+		AnimInstance->Montage_Play(
+			ComboActionMontage, AttackSppedRate
+		);
 
 		// 몽타주 재생이 끝나면 이 클래스의 특정 함수를 실행.
 		FOnMontageEnded OnMontageEnded;
@@ -129,6 +154,7 @@ void AABCharacterBase::ComboActionBegin()
 		// 콤보 타이밍 확인용 타이머 설정.
 		// 기존에 설정된 타이머 핸들 무효화(초기화).
 		ComboTimerHandle.Invalidate();
+
 		// 타이머 설정 및 콤보 단계 처리.
 		SetComboCheckTimer();
 	}
@@ -168,7 +194,7 @@ void AABCharacterBase::SetComboCheckTimer()
 	// 초 단위 시간 값 계산 (타이머에 설정할 값).
 	float ComboEffectTime =
 		(ComboActionData->EffectiveFrameCount[ComboIndex]
-		/ ComboActionData->FrameRate) / AttackSpeedRate;
+			/ ComboActionData->FrameRate) / AttackSpeedRate;
 
 	// 타이머 설정.
 	if (ComboEffectTime > 0)
@@ -229,6 +255,39 @@ void AABCharacterBase::ComboCheck()
 			// 콤보 처리에 사용한 입력 값도 초기화.
 			HasNextComboCommand = false;
 		}
+	}
+}
+
+void AABCharacterBase::SetDead()
+{
+	// 캐릭터 무브먼트 끄기.
+	GetCharacterMovement()->SetMovementMode(
+		EMovementMode::MOVE_None
+	);
+
+	// 죽는 애니메이션 재생.
+	PlayDeadAnimation();
+
+	// 콜리전 끄기.
+	SetActorEnableCollision(false);
+}
+
+void AABCharacterBase::PlayDeadAnimation()
+{
+	// 몽타주 재생.
+	UAnimInstance* AnimInstance
+		= GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		// 이미 재생 중인 몽타주가 있을 수 있으니 모두 종료.
+		AnimInstance->StopAllMontages(0.0f);
+
+		// 재생 속도.
+		const float PlayRate = 1.0f;
+		AnimInstance->Montage_Play(
+			DeadMontage,
+			PlayRate
+		);
 	}
 }
 

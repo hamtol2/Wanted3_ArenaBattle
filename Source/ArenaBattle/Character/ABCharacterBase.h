@@ -36,6 +36,13 @@ protected:
 		const class UABCharacterControlData* InCharacterControlData
 	);
 
+	// 대미지 처리 함수 오버라이드.
+	virtual float TakeDamage(
+		float DamageAmount, 
+		struct FDamageEvent const& DamageEvent, 
+		class AController* EventInstigator, 
+		AActor* DamageCauser) override;
+
 	// Combo 섹션.
 protected:
 	// 콤보 액션 처리 함수.
@@ -58,6 +65,17 @@ protected:
 	// 이 시간 전에 공격 입력이 제대로 들어왔는지 판단 후 콤보 처리 분기.
 	void ComboCheck();
 
+	// Dead 섹션.
+protected:
+
+	// 죽음 설정 함수.
+	// 대미지 처리 후 체력 소진되면 죽음.
+	// 죽음 상태 설정.
+	virtual void SetDead();
+
+	// 죽음 애니메이션 재생.
+	void PlayDeadAnimation();
+
 protected:
 
 	// 열거형 타입-UABCharacterControlData 애셋을 짝(Pair)로 관리하는 맵.
@@ -67,6 +85,9 @@ protected:
 	// 콤보 공격 애님 몽타주.
 	UPROPERTY(EditAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> ComboActionMontage;
+
+	UPROPERTY(EditAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAnimMontage> DeadMontage;
 
 	// 콤보 처리를 위한 데이터를 가지는 데이터 애셋.
 	UPROPERTY(VisibleAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
