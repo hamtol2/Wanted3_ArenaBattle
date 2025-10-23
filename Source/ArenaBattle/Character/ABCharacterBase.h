@@ -53,4 +53,19 @@ protected:
 	// 콤보 공격 애님 몽타주.
 	UPROPERTY(EditAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> ComboActionMontage;
+
+	// 콤보 처리를 위한 데이터를 가지는 데이터 애셋.
+	UPROPERTY(VisibleAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UABComboActionData> ComboActionData;
+
+	// 현재 콤보 단계 추적 변수.
+	UPROPERTY(VisibleAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
+	uint32 CurrentCombo = 0;
+
+	// 콤보 판정에 사용할 타이머.
+	FTimerHandle ComboTimerHandle;
+
+	// 콤보 점프를 판정할 때 사용할 Bool 변수.
+	UPROPERTY(VisibleAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
+	bool HasNextComboCommand = false;
 };
