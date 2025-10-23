@@ -5,12 +5,21 @@
 #include "ABCharacterControlData.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "ABComboActionData.h"
+#include "Physics/ABCollision.h"
+#include "Components/CapsuleComponent.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	// 컴포넌트 설정.
+	GetCapsuleComponent()->SetCollisionProfileName(CPROPILE_ABCAPSULE);
+
+	// 메시의 콜리전은 NoCollision으로 설정.
+	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
 
 	// 캐릭터 컨트롤 데이터 애셋 검색 후 설정.
 	static ConstructorHelpers::FObjectFinder<UABCharacterControlData> ShoulderDataRef(TEXT("/Game/ArenaBattle/CharacterControl/ABC_Shoulder.ABC_Shoulder"));
@@ -221,4 +230,89 @@ void AABCharacterBase::ComboCheck()
 			HasNextComboCommand = false;
 		}
 	}
+}
+
+void AABCharacterBase::AttackHitCheck()
+{
+	// 애님 노티파이를 통해 함수가 호출됨.
+	// 충돌 판정 로직 작성.
+
+	// 충돌 판정 시작 위치.
+	FVector Start
+		= GetActorLocation()
+		+ GetActorForwardVector()
+		* GetCapsuleComponent()->GetScaledCapsuleRadius();
+
+	// 충돌 판정 종료 위치.
+	const float AttackRange = 50.0f;
+	FVector End
+		= Start + GetActorForwardVector() * AttackRange;
+
+	// 트레이스에 사용할 반지름 값.
+	const float AttackRadius = 50.0f;
+
+	// SCENE_QUERY_STAT-FName 타입의 태그값 생성 매크로(엔진 내부에서 사용).
+	// 두번째 인자: 복잡한 형태로 충돌체를 감지할지 여부 지정.
+	// 세번째 인자: 충돌 판정에서 제외할 액터 목록 (자기자신 제외).
+	FCollisionQueryParams Params(
+		SCENE_QUERY_STAT(Attack),
+		false,
+		this
+	);
+
+	// 트레이스를 활용해 충돌 검사.
+	FHitResult OutHitResult;
+	bool HitDetected = GetWorld()->SweepSingleByChannel(
+		OutHitResult,
+		Start,
+		End,
+		FQuat::Identity,
+		CCHANNEL_ABACTION,
+		FCollisionShape::MakeSphere(AttackRadius),
+		Params
+	);
+
+	// 충돌이 감지된 경우의 처리.
+	if (HitDetected)
+	{
+		// 대미지 양.
+		const float AttackDamage = 30.0f;
+
+		// 대미지 이벤트.
+		FDamageEvent DamageEvent;
+
+		// 대미지 전달.
+		OutHitResult.GetActor()->TakeDamage(
+			AttackDamage,
+			DamageEvent,
+			GetController(),
+			this
+		);
+	}
+
+	// 디버그 모드일 때만 그리도록.
+#if ENABLE_DRAW_DEBUG
+
+	// 캡슐의 중심 위치.
+	FVector CapsuleOrigin = Start + (End - Start) * 0.5f;
+
+	// 캡슐 높이의 절반 값.
+	float CapsuleHalfHeight = AttackRange * 0.5f;
+
+	// 색상 (그리기 색상).
+	FColor DrawColor = HitDetected ? FColor::Green : FColor::Red;
+
+	// 충돌 디버그 (시각적 도구 활용).
+	DrawDebugCapsule(
+		GetWorld(),
+		CapsuleOrigin,
+		CapsuleHalfHeight,
+		AttackRadius,
+		FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat(),
+		DrawColor,
+		false,
+		5.0f
+	);
+#endif
+
 }
