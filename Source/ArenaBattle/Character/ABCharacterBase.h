@@ -44,6 +44,14 @@ protected:
 		UAnimMontage* TargetMontage, bool Interrupted
 	);
 
+	// 콤보 타이머 설정 함수.
+	void SetComboCheckTimer();
+
+	// 콤보 타이밍 처리 함수.
+	// 타이머에 설정된 시간이 경과했을 때 실행됨.
+	// 이 시간 전에 공격 입력이 제대로 들어왔는지 판단 후 콤보 처리 분기.
+	void ComboCheck();
+
 protected:
 
 	// 열거형 타입-UABCharacterControlData 애셋을 짝(Pair)로 관리하는 맵.

@@ -4,6 +4,7 @@
 #include "Character/ABCharacterBase.h"
 #include "ABCharacterControlData.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "ABComboActionData.h"
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
@@ -76,11 +77,15 @@ void AABCharacterBase::ProcessComboCommand()
 
 	// 공격이 이미 재생 중일 때는 타이머를 확인해서 콤보 타이밍 확인.
 	// 타이머 핸들이 유효한지 여부로 판단 가능.
+	//HasNextComboCommand = ComboTimerHandle.IsValid();
 	if (!ComboTimerHandle.IsValid())
 	{
-
+		HasNextComboCommand = false;
 	}
-	
+	else
+	{
+		HasNextComboCommand = true;
+	}
 }
 
 void AABCharacterBase::ComboActionBegin()
@@ -111,6 +116,12 @@ void AABCharacterBase::ComboActionBegin()
 		AnimInstance->Montage_SetEndDelegate(
 			OnMontageEnded, ComboActionMontage
 		);
+
+		// 콤보 타이밍 확인용 타이머 설정.
+		// 기존에 설정된 타이머 핸들 무효화(초기화).
+		ComboTimerHandle.Invalidate();
+		// 타이머 설정 및 콤보 단계 처리.
+		SetComboCheckTimer();
 	}
 }
 
@@ -127,4 +138,87 @@ void AABCharacterBase::ComboActionEnd(
 	GetCharacterMovement()->SetMovementMode(
 		EMovementMode::MOVE_Walking
 	);
+}
+
+void AABCharacterBase::SetComboCheckTimer()
+{
+	// 현재 재생중인 콤보의 인덱스 계산.
+	int32 ComboIndex = CurrentCombo - 1;
+
+	// 계산된 인덱스 값 검증(어설트).
+	ensureAlways(
+		ComboActionData->EffectiveFrameCount.IsValidIndex(ComboIndex)
+	);
+
+	// 데이터 애셋에 설정된 프레임 값을 사용해 
+	// 콤보 판정 구간의 시간 값(단위: 초) 구하기.
+	// 왜? 타이머에 쓰려고.
+
+	// 애니메이션 재생 속도.
+	const float AttackSpeedRate = 1.0f;
+	// 초 단위 시간 값 계산 (타이머에 설정할 값).
+	float ComboEffectTime =
+		(ComboActionData->EffectiveFrameCount[ComboIndex]
+		/ ComboActionData->FrameRate) / AttackSpeedRate;
+
+	// 타이머 설정.
+	if (ComboEffectTime > 0)
+	{
+		// 시간은 월드가 관리(시간 관리자를 통해)
+		GetWorld()->GetTimerManager().SetTimer(
+			ComboTimerHandle,
+			this,
+			&AABCharacterBase::ComboCheck,
+			ComboEffectTime,
+			false
+		);
+	}
+
+}
+
+void AABCharacterBase::ComboCheck()
+{
+	// 타이머 핸들 초기화(재사용을 위해).
+	ComboTimerHandle.Invalidate();
+
+	// 콤보 타이머 시간 전에 공격 입력이 들어왔는지 확인.
+	if (HasNextComboCommand)
+	{
+		UAnimInstance* AnimInstance
+			= GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			// 몽타주 섹션 점프.
+		// "ComboAttack1" -> "ComboAttack2".
+		// "접두어" + (CurrentCombo + 1) -> ComboAttack2..
+		//CurrentCombo = CurrentCombo + 1;
+		//if (CurrentCombo > ComboActionData->EffectiveFrameCount.Num())
+		//{
+		//	CurrentCombo = ComboActionData->EffectiveFrameCount.Num();
+		//}
+			CurrentCombo = FMath::Clamp(
+				CurrentCombo + 1,
+				1,
+				ComboActionData->MaxComboCount
+			);
+
+			// 섹션 이름 만들기.
+			FName NextSecion = *FString::Printf(
+				TEXT("%s%d"),
+				*ComboActionData->MontageSectionNamePrefix,
+				CurrentCombo
+			);
+
+			// 몽타주 점프.
+			AnimInstance->Montage_JumpToSection(
+				NextSecion,
+				ComboActionMontage
+			);
+
+			// 타이머 재설정.
+			SetComboCheckTimer();
+			// 콤보 처리에 사용한 입력 값도 초기화.
+			HasNextComboCommand = false;
+		}
+	}
 }
