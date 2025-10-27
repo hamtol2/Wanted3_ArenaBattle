@@ -9,6 +9,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Engine/DamageEvents.h"
 
+#include "CharacterStat/ABCharacterStatComponent.h"
+#include "Components/WidgetComponent.h"
+
 // Sets default values
 AABCharacterBase::AABCharacterBase()
 {
@@ -61,6 +64,31 @@ AABCharacterBase::AABCharacterBase()
 		DeadMontage = DeadMontageRef.Object;
 	}
 
+	// Stat Component.
+	Stat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("Stat"));
+
+	// Widget Component.
+	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
+	HpBar->SetupAttachment(GetMesh());
+
+	// 위치 조정.
+	HpBar->SetRelativeLocation(FVector(0.0f, 0.0f, 200.0f));
+
+	// 어떤 WidgetBlueprint를 사용해 그릴지 지정.
+	static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef(TEXT("/Game/ArenaBattle/UI/WBP_HPBar.WBP_HPBar_C"));
+	if (HpBarWidgetRef.Succeeded())
+	{
+		// 컴포넌트에서 사용할 위젯 클래스 설정.
+		HpBar->SetWidgetClass(HpBarWidgetRef.Class);
+
+		// 위젯을 그릴 공간 지정.
+		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+
+		// 그릴 크기 지정.
+		HpBar->SetDrawSize(FVector2D(150.0f, 15.0f));
+
+		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 void AABCharacterBase::SetCharacterControlData(

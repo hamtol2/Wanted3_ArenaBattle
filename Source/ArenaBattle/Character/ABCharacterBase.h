@@ -107,5 +107,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
 	bool HasNextComboCommand = false;
 
-	
+	// Stat 섹션.
+protected:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Stat, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UABCharacterStatComponent> Stat;
+
+	// Widget 섹션.
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UWidgetComponent> HpBar;
+
 };
