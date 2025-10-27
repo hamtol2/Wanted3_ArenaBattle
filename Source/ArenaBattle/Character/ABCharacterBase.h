@@ -89,6 +89,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UAnimMontage> DeadMontage;
 
+	// 죽은 뒤에 대기할 시간 (이 시간 이후에 캐릭터 삭제).
+	float DeadEventDelayTime = 5.0f;
+
 	// 콤보 처리를 위한 데이터를 가지는 데이터 애셋.
 	UPROPERTY(VisibleAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UABComboActionData> ComboActionData;
