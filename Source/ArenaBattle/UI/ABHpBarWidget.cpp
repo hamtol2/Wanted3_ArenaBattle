@@ -3,6 +3,7 @@
 
 #include "UI/ABHpBarWidget.h"
 #include "Components/ProgressBar.h"
+#include "Interface/ABCharacterWidgetInterface.h"
 
 UABHpBarWidget::UABHpBarWidget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -32,4 +33,13 @@ void UABHpBarWidget::NativeConstruct()
 	HpProgressBar 
 		= Cast<UProgressBar>(GetWidgetFromName(TEXT("PbHpBar")));
 	ensureAlways(HpProgressBar);
+
+	// 인터페이스를 통해 캐릭터에 접근해서
+	// 초기화 요청.
+	IABCharacterWidgetInterface* CharacterWidget
+		= Cast<IABCharacterWidgetInterface>(OwningActor);
+	if (CharacterWidget)
+	{
+		CharacterWidget->SetupCharacterWidget(this);
+	}
 }

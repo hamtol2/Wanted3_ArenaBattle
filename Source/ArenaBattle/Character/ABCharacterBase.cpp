@@ -10,7 +10,9 @@
 #include "Engine/DamageEvents.h"
 
 #include "CharacterStat/ABCharacterStatComponent.h"
-#include "Components/WidgetComponent.h"
+#include "UI/ABWidgetComponent.h"
+
+#include "UI/ABHpBarWidget.h"
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
@@ -68,7 +70,7 @@ AABCharacterBase::AABCharacterBase()
 	Stat = CreateDefaultSubobject<UABCharacterStatComponent>(TEXT("Stat"));
 
 	// Widget Component.
-	HpBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
+	HpBar = CreateDefaultSubobject<UABWidgetComponent>(TEXT("Widget"));
 	HpBar->SetupAttachment(GetMesh());
 
 	// 위치 조정.
@@ -89,6 +91,14 @@ AABCharacterBase::AABCharacterBase()
 
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+}
+
+void AABCharacterBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	// 체력을 모두 소진했을 때 발행되는 델리게이트에 구독.
+	Stat->OnHpZero.AddUObject(this, &AABCharacterBase::SetDead);
 }
 
 void AABCharacterBase::SetCharacterControlData(
@@ -120,7 +130,8 @@ float AABCharacterBase::TakeDamage(
 	);
 
 	// @Test: 바로 죽음 처리.
-	SetDead();
+	//SetDead();
+	Stat->ApplyDamage(DamageAmount);
 
 	return DamageAmount;
 }
@@ -298,6 +309,9 @@ void AABCharacterBase::SetDead()
 
 	// 콜리전 끄기.
 	SetActorEnableCollision(false);
+
+	// 죽으면 HpBar 사라지도록 처리.
+	HpBar->SetHiddenInGame(true);
 }
 
 void AABCharacterBase::PlayDeadAnimation()
@@ -402,4 +416,22 @@ void AABCharacterBase::AttackHitCheck()
 	);
 #endif
 
+}
+
+void AABCharacterBase::SetupCharacterWidget(UABUserWidget* InUserWidget)
+{
+	// 초기 값 설정 및 델리게이트 연결.
+	UABHpBarWidget* HpBarWidget = Cast<UABHpBarWidget>(InUserWidget);
+	if (HpBarWidget)
+	{
+		// 스탯 데이터를 기반으로 위젯에 값 설정.
+		HpBarWidget->SetMaxHp(Stat->GetMaxHp());
+		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
+
+		// 델리게이트 연결.
+		Stat->OnHpChanged.AddUObject(
+			HpBarWidget, 
+			&UABHpBarWidget::UpdateHpBar
+		);
+	}
 }

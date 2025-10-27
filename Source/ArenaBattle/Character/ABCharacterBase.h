@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Interface/ABAnimationAttackInterface.h"
+#include "Interface/ABCharacterWidgetInterface.h"
 #include "ABCharacterBase.generated.h"
 
 // 캐릭터 컨트롤 타입을 지정하는 열거형.
@@ -17,7 +18,9 @@ enum class ECharacterControlType : uint8
 
 UCLASS()
 class ARENABATTLE_API AABCharacterBase 
-	: public ACharacter, public IABAnimationAttackInterface
+	: public ACharacter, 
+	public IABAnimationAttackInterface,
+	public IABCharacterWidgetInterface
 {
 	GENERATED_BODY()
 
@@ -25,9 +28,16 @@ public:
 	// Sets default values for this character's properties
 	AABCharacterBase();
 
+	// 컴포넌트 초기화가 끝나면 호출되는 이벤트 함수.
+	virtual void PostInitializeComponents() override;
+
 	// IABAnimationAttackInterface 함수 구현.
 	// 애님 노티파이 기반으로 충돌 판정하는 목적으로 사용.
 	virtual void AttackHitCheck() override;
+
+	// IABCharacterWidgetInterface 함수 구현.
+	// Widget에서 캐릭터에 설정 요청할 때 사용.
+	virtual void SetupCharacterWidget(class UABUserWidget* InUserWidget) override;
 
 protected:
 
@@ -116,6 +126,6 @@ protected:
 	// Widget 섹션.
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Widget, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UWidgetComponent> HpBar;
+	TObjectPtr<class UABWidgetComponent> HpBar;
 
 };
