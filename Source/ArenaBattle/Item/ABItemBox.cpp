@@ -6,6 +6,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "Physics/ABCollision.h"
+#include "Interface/ABCharacterItemInterface.h"
+#include "Character/ABCharacterBase.h"
 
 // Sets default values
 AABItemBox::AABItemBox()
@@ -28,7 +30,7 @@ AABItemBox::AABItemBox()
 
 	// BeginOvelap 델리게이트에 함수 등록.
 	Trigger->OnComponentBeginOverlap.AddDynamic(
-		this, 
+		this,
 		&AABItemBox::OnOverlapBegin
 	);
 
@@ -54,9 +56,31 @@ AABItemBox::AABItemBox()
 	}
 }
 
-void AABItemBox::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AABItemBox::OnOverlapBegin(
+	UPrimitiveComponent* OverlappedComponent,
+	AActor* OtherActor,
+	UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex,
+	bool bFromSweep,
+	const FHitResult& SweepResult)
 {
 	// 아이템 습득 후 처리 진행.
+
+	// 꽝 처리.
+	if (!Item)
+	{
+		Destroy();
+		return;
+	}
+
+	// 아이템이 있으면 캐릭터에 아이템 습득 메시지 전달.
+	//IABCharacterItemInterface* OverlappingPawn = Cast<IABCharacterItemInterface>(OtherActor);
+	AABCharacterBase* OverlappingPawn 
+		= Cast<AABCharacterBase>(OtherActor);
+	if (OverlappingPawn)
+	{
+		OverlappingPawn->TakeItem(Item);
+	}
 
 	// 파티클 재생.
 	Effect->Activate();

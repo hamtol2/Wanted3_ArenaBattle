@@ -13,6 +13,7 @@
 #include "UI/ABWidgetComponent.h"
 
 #include "UI/ABHpBarWidget.h"
+#include "Item/ABItemData.h"
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
@@ -434,4 +435,14 @@ void AABCharacterBase::SetupCharacterWidget(UABUserWidget* InUserWidget)
 			&UABHpBarWidget::UpdateHpBar
 		);
 	}
+}
+
+void AABCharacterBase::TakeItem(UABItemData* InItemData)
+{
+	UE_LOG(
+		LogTemp, 
+		Log, 
+		TEXT("Item Collected. Type: %d"), 
+		(uint8)InItemData->Type
+	);
 }

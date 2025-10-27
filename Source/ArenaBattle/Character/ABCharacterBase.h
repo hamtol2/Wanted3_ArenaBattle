@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Interface/ABAnimationAttackInterface.h"
 #include "Interface/ABCharacterWidgetInterface.h"
+#include "Interface/ABCharacterItemInterface.h"
 #include "ABCharacterBase.generated.h"
 
 // 캐릭터 컨트롤 타입을 지정하는 열거형.
@@ -20,7 +21,8 @@ UCLASS()
 class ARENABATTLE_API AABCharacterBase 
 	: public ACharacter, 
 	public IABAnimationAttackInterface,
-	public IABCharacterWidgetInterface
+	public IABCharacterWidgetInterface,
+	public IABCharacterItemInterface
 {
 	GENERATED_BODY()
 
@@ -38,6 +40,10 @@ public:
 	// IABCharacterWidgetInterface 함수 구현.
 	// Widget에서 캐릭터에 설정 요청할 때 사용.
 	virtual void SetupCharacterWidget(class UABUserWidget* InUserWidget) override;
+
+	// IABCharacterItemInterface 함수 구현.
+	// 캐릭터가 아이템을 습득했을 때 호출.
+	virtual void TakeItem(class UABItemData* InItemData) override;
 
 protected:
 

@@ -46,4 +46,8 @@ protected:
 	// 아이템 습득했을 때 이펙트를 보여주는데 사용할 컴포넌트.
 	UPROPERTY(VisibleAnywhere, Category = Box)
 	TObjectPtr<class UParticleSystemComponent> Effect;
+
+	// 아이템 정보.
+	UPROPERTY(EditAnywhere, Category = Item)
+	TObjectPtr<class UABItemData> Item;
 };
