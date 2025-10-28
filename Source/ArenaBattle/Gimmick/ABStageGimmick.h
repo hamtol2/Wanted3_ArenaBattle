@@ -6,6 +6,39 @@
 #include "GameFramework/Actor.h"
 #include "ABStageGimmick.generated.h"
 
+// 스테이지 상태를 나타내는 열거형.
+UENUM(BlueprintType)
+enum class EStageState : uint8
+{
+	Ready,
+	Fight,
+	Reward,
+	Next
+};
+
+// 상태 처리에 사용할 델리게이트 선언.
+DECLARE_DELEGATE(FOnStageChangedDelegate);
+
+// 델리게이트를 컨테이너에 저장하기 위한 래퍼 구조체.
+USTRUCT(BlueprintType)
+struct FStageChangedDelegateWrapper
+{
+	GENERATED_BODY()
+
+	FStageChangedDelegateWrapper() {}
+	FStageChangedDelegateWrapper(FOnStageChangedDelegate InDelegate)
+		: StageDelegate(InDelegate)
+	{
+	}
+
+	//void operator()()
+	//{
+	//	StageDelegate.ExecuteIfBound();
+	//}
+
+	FOnStageChangedDelegate StageDelegate;
+};
+
 UCLASS()
 class ARENABATTLE_API AABStageGimmick : public AActor
 {
@@ -14,6 +47,12 @@ class ARENABATTLE_API AABStageGimmick : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AABStageGimmick();
+
+protected:
+
+	// 생성되는 과정에서 호출됨.
+	// 배치된 액터의 상태가 변경될 때마다 호출됨.
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 	// Stage Section.
 protected:
@@ -25,6 +64,23 @@ protected:
 	// 입장 처리를 위한 박스 컴포넌트.
 	UPROPERTY(VisibleAnywhere, Category = Stage, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UBoxComponent> StageTrigger;
+
+	// 스테이지 상태.
+	UPROPERTY(EditAnywhere, Category = Stage, meta = (AllowPrivateAccess = "true"))
+	EStageState CurrentState;
+
+	// 상태에 따른 처리를 위한 맵.
+	UPROPERTY()
+	TMap<EStageState, FStageChangedDelegateWrapper> StageDelegate;
+
+	// 상태 설정 함수.
+	void SetState(EStageState InNewState);
+
+	// 각 상태에 실행할 함수.
+	void SetReady();
+	void SetFight();
+	void SetChooseReward();
+	void SetChooseNext();
 
 	// 박스 컴포넌트의 오버랩 이벤트 등록 함수.
 	UFUNCTION()
@@ -58,4 +114,29 @@ protected:
 		bool bFromSweep,
 		const FHitResult& SweepResult
 	);
+
+	// 문 열고/닫기.
+	void OpenAllGates();
+	void CloseAllGates();
+
+	// Fight Section.
+protected:
+
+	// 대전할 NPC 클래스.
+	UPROPERTY(EditAnywhere, Category = Fight, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class AABCharacterNonPlayer> OpponentClass;
+
+	// 생성까지 대기할 시간.
+	UPROPERTY(EditAnywhere, Category = Fight, meta = (AllowPrivateAccess = "true"))
+	float OpponentSpawnTime;
+
+	// 타이머 핸들.
+	FTimerHandle OpponentSpawnTimerHandle;
+
+	// NPC 생성 함수(타이머 종료되면 실행).
+	void OnOpponentSpawn();
+
+	// NPC가 죽으면 호출될 함수.
+	UFUNCTION()
+	void OnOpponentDestroyed(AActor* DestroyedActor);
 };
