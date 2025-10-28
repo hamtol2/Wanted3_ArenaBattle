@@ -15,6 +15,13 @@ public:
 	// Sets default values for this actor's properties
 	AABItemBox();
 
+	// 트리거 Getter.
+	FORCEINLINE class UBoxComponent* GetTrigger() const { return Trigger; }
+
+protected:
+	// 컴포넌트 초기화 완료 이벤트 함수.
+	virtual void PostInitializeComponents() override;
+
 protected:
 
 	// Box컴포넌트의 OnComponentBeginOverlap 델리게이트에 등록할 함수.
