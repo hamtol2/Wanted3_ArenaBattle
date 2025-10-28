@@ -38,6 +38,72 @@ AABStageGimmick::AABStageGimmick()
 	);
 
 	// Gate Section.
+	// 문 위치를 나타내는 소켓 이름 값.
+	static FName GateSockets[] =
+	{
+		TEXT("+XGate"),
+		TEXT("-XGate"),
+		TEXT("+YGate"),
+		TEXT("-YGate")
+	};
+
+	// 메시 로드 및 설정.
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> GateMeshRef(
+		TEXT("/Game/ArenaBattle/Environment/Props/SM_GATE.SM_GATE")
+	);
+
+	for (const FName& GateSocket : GateSockets)
+	{
+		// 컴포넌트 생성.
+		UStaticMeshComponent* Gate
+			= CreateDefaultSubobject<UStaticMeshComponent>(GateSocket);
+
+		if (GateMeshRef.Succeeded())
+		{
+			Gate->SetStaticMesh(GateMeshRef.Object);
+		}
+
+		// 계층 설정.
+		Gate->SetupAttachment(Stage, GateSocket);
+
+		// 상대 위치 설정.
+		Gate->SetRelativeLocation(FVector(0.0f, -80.0f, 0.0f));
+
+		// 상대 회전 설정.
+		Gate->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
+
+		// 배열에 추가.
+		Gates.Add(GateSocket, Gate);
+
+		// Gate 콜리전.
+		//FName TriggerName
+		//	= *FString::Printf(TEXT("%sTrigger"), *GateSocket.ToString());
+		FName TriggerName = *GateSocket.ToString().Append(TEXT("Trigger"));
+		UBoxComponent* GateTrigger
+			= CreateDefaultSubobject<UBoxComponent>(TriggerName);
+		
+		// 계층 설정.
+		GateTrigger->SetupAttachment(Stage, GateSocket);
+
+		// 크기 지정.
+		GateTrigger->SetBoxExtent(FVector(100.0f, 100.0f, 300.0f));
+
+		// 상대 위치 설정.
+		GateTrigger->SetRelativeLocation(FVector(0.0f, 0.0f, 300.0f));
+
+		// 콜리전 설정
+		GateTrigger->SetCollisionProfileName(CPROPILE_ABTRIGGER);
+
+		// 오버랩 이벤트에 함수 등록.
+		GateTrigger->OnComponentBeginOverlap.AddDynamic(
+			this,
+			&AABStageGimmick::OnGateTriggerBeginOverlap
+		);
+
+		// 배열에 추가.
+		GateTriggers.Add(GateTrigger);
+	}
+
 
 }
 
