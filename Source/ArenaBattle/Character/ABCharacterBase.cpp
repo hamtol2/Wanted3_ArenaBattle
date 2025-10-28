@@ -28,6 +28,26 @@ AABCharacterBase::AABCharacterBase()
 	// 메시의 콜리전은 NoCollision으로 설정.
 	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
 
+	// 메시 컴포넌트 설정.
+	GetMesh()->SetRelativeLocationAndRotation(
+		FVector(0.0f, 0.0f, -88.0f),
+		FRotator(0.0f, -90.0f, 0.0f)
+	);
+
+	// 애셋 지정.
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMesh(TEXT("/Game/InfinityBladeWarriors/Character/CompleteCharacters/SK_CharM_Warrior.SK_CharM_Warrior"));
+	if (CharacterMesh.Succeeded())
+	{
+		GetMesh()->SetSkeletalMesh(CharacterMesh.Object);
+	}
+
+	static ConstructorHelpers::FClassFinder<UAnimInstance> CharaterAnim(TEXT("/Game/ArenaBattle/Animation/ABP_ABCharacter.ABP_ABCharacter_C"));
+	if (CharaterAnim.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass(CharaterAnim.Class);
+	}
+
+
 	// 캐릭터 컨트롤 데이터 애셋 검색 후 설정.
 	static ConstructorHelpers::FObjectFinder<UABCharacterControlData> ShoulderDataRef(TEXT("/Game/ArenaBattle/CharacterControl/ABC_Shoulder.ABC_Shoulder"));
 	if (ShoulderDataRef.Succeeded())

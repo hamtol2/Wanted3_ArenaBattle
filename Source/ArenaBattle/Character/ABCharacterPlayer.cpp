@@ -29,24 +29,24 @@ AABCharacterPlayer::AABCharacterPlayer()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	GetCharacterMovement()->JumpZVelocity = 700.0f;
 
-	// 메시 컴포넌트 설정.
-	GetMesh()->SetRelativeLocationAndRotation(
-		FVector(0.0f, 0.0f, -88.0f),
-		FRotator(0.0f, -90.0f, 0.0f)
-	);
+	//// 메시 컴포넌트 설정.
+	//GetMesh()->SetRelativeLocationAndRotation(
+	//	FVector(0.0f, 0.0f, -88.0f),
+	//	FRotator(0.0f, -90.0f, 0.0f)
+	//);
 
-	// 애셋 지정.
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMesh(TEXT("/Game/InfinityBladeWarriors/Character/CompleteCharacters/SK_CharM_Warrior.SK_CharM_Warrior"));
-	if (CharacterMesh.Succeeded())
-	{
-		GetMesh()->SetSkeletalMesh(CharacterMesh.Object);
-	}
+	//// 애셋 지정.
+	//static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMesh(TEXT("/Game/InfinityBladeWarriors/Character/CompleteCharacters/SK_CharM_Warrior.SK_CharM_Warrior"));
+	//if (CharacterMesh.Succeeded())
+	//{
+	//	GetMesh()->SetSkeletalMesh(CharacterMesh.Object);
+	//}
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> CharaterAnim(TEXT("/Game/ArenaBattle/Animation/ABP_ABCharacter.ABP_ABCharacter_C"));
-	if (CharaterAnim.Succeeded())
-	{
-		GetMesh()->SetAnimInstanceClass(CharaterAnim.Class);
-	}
+	//static ConstructorHelpers::FClassFinder<UAnimInstance> CharaterAnim(TEXT("/Game/ArenaBattle/Animation/ABP_ABCharacter.ABP_ABCharacter_C"));
+	//if (CharaterAnim.Succeeded())
+	//{
+	//	GetMesh()->SetAnimInstanceClass(CharaterAnim.Class);
+	//}
 
 	// SpringArm 컴포넌트 생성 및 설정.
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));

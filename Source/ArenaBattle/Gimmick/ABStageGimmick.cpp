@@ -152,6 +152,15 @@ AABStageGimmick::AABStageGimmick()
 			)
 		)
 	);
+
+	// Fight Section.
+
+	// 생성할 NPC 클래스 정보 설정.
+	OpponentClass = AABCharacterNonPlayer::StaticClass();
+
+	// NPC 생성할 때 대기할 시간 값 설정(단위: 초).
+	OpponentSpawnTime = 3.0f;
+
 }
 
 void AABStageGimmick::OnConstruction(const FTransform& Transform)
@@ -204,6 +213,16 @@ void AABStageGimmick::SetFight()
 
 	// 문 닫기.
 	CloseAllGates();
+
+	// NPC 생성.
+	GetWorld()->GetTimerManager().SetTimer(
+		OpponentSpawnTimerHandle,
+		this,
+		&AABStageGimmick::OnOpponentSpawn,
+		OpponentSpawnTime,
+		false
+	);
+
 }
 
 void AABStageGimmick::SetChooseReward()
@@ -219,6 +238,19 @@ void AABStageGimmick::SetChooseReward()
 
 	// 문 닫기.
 	CloseAllGates();
+
+	// 아이템 생성.
+	// 4개 생성.
+
+	// 4개의 위치.
+
+
+
+	// 아이템 4개 중 하나 습득(충돌)하면 다음 단계로 전환.
+
+
+
+
 }
 
 void AABStageGimmick::SetChooseNext()

@@ -139,4 +139,10 @@ protected:
 	// NPC가 죽으면 호출될 함수.
 	UFUNCTION()
 	void OnOpponentDestroyed(AActor* DestroyedActor);
+
+	// Reward Section.
+protected:
+
+
+
 };
