@@ -14,6 +14,7 @@
 
 #include "UI/ABHpBarWidget.h"
 #include "Item/ABItemData.h"
+#include "Item/ABWeaponItemData.h"
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
@@ -92,6 +93,35 @@ AABCharacterBase::AABCharacterBase()
 
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	// Item 섹션.
+	TakeItemActions.Add(
+		FTakeItemDelegateWrapper(
+			FOnTakeItemDelegate::CreateUObject(
+				this,
+				&AABCharacterBase::EquipWeapon)
+		)
+	);
+
+	TakeItemActions.Add(
+		FTakeItemDelegateWrapper(
+			FOnTakeItemDelegate::CreateUObject(
+				this,
+				&AABCharacterBase::DrinkPotion)
+		)
+	);
+
+	TakeItemActions.Add(
+		FTakeItemDelegateWrapper(
+			FOnTakeItemDelegate::CreateUObject(
+				this,
+				&AABCharacterBase::ReadScroll)
+		)
+	);
+
+	// Weapon Component.
+	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
+	Weapon->SetupAttachment(GetMesh(), TEXT("hand_rSocket"));
 }
 
 void AABCharacterBase::PostInitializeComponents()
@@ -334,6 +364,8 @@ void AABCharacterBase::PlayDeadAnimation()
 	}
 }
 
+
+
 void AABCharacterBase::AttackHitCheck()
 {
 	// 애님 노티파이를 통해 함수가 호출됨.
@@ -439,10 +471,55 @@ void AABCharacterBase::SetupCharacterWidget(UABUserWidget* InUserWidget)
 
 void AABCharacterBase::TakeItem(UABItemData* InItemData)
 {
-	UE_LOG(
-		LogTemp, 
-		Log, 
-		TEXT("Item Collected. Type: %d"), 
-		(uint8)InItemData->Type
-	);
+	//UE_LOG(
+	//	LogTemp, 
+	//	Log, 
+	//	TEXT("Item Collected. Type: %d"), 
+	//	(uint8)InItemData->Type
+	//);
+
+	// 3가지 종류의 아이템에 따라 처리를 분기.
+	if (InItemData)
+	{
+		// 타입 별로 인덱스 구하기.
+		uint8 Index = (uint8)InItemData->Type;
+
+		// 호출할 델리게이트 가져오기.
+		FOnTakeItemDelegate Delegate 
+			= TakeItemActions[Index].ItemDelegate;
+
+		// 델리게이트 호출.
+		Delegate.ExecuteIfBound(InItemData);
+	}
+}
+
+void AABCharacterBase::DrinkPotion(UABItemData* InItemData)
+{
+	UE_LOG(LogTemp, Log, TEXT("Drink Potion"));
+}
+
+void AABCharacterBase::EquipWeapon(UABItemData* InItemData)
+{
+	//UE_LOG(LogTemp, Log, TEXT("Equip Weapon"));
+
+	// 무기 아이템 타입으로 형변환 후 무기 메시 설정.
+	UABWeaponItemData* WeaponItemData
+		= Cast<UABWeaponItemData>(InItemData);
+	if (WeaponItemData)
+	{
+		// 무기 메시가 이미 로드됐는지 확인.
+		// 로드가 안됐으면 로드 처리.
+		if (WeaponItemData->WeaponMesh.IsPending())
+		{
+			WeaponItemData->WeaponMesh.LoadSynchronous();
+		}
+
+		// 로드가 완료되면 메시 설정.
+		Weapon->SetSkeletalMesh(WeaponItemData->WeaponMesh.Get());
+	}
+}
+
+void AABCharacterBase::ReadScroll(UABItemData* InItemData)
+{
+	UE_LOG(LogTemp, Log, TEXT("Read Scroll"));
 }

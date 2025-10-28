@@ -74,9 +74,7 @@ void AABItemBox::OnOverlapBegin(
 	}
 
 	// 아이템이 있으면 캐릭터에 아이템 습득 메시지 전달.
-	//IABCharacterItemInterface* OverlappingPawn = Cast<IABCharacterItemInterface>(OtherActor);
-	AABCharacterBase* OverlappingPawn 
-		= Cast<AABCharacterBase>(OtherActor);
+	IABCharacterItemInterface* OverlappingPawn = Cast<IABCharacterItemInterface>(OtherActor);
 	if (OverlappingPawn)
 	{
 		OverlappingPawn->TakeItem(Item);
