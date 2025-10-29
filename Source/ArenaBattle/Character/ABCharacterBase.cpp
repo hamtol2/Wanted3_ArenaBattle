@@ -540,6 +540,9 @@ void AABCharacterBase::EquipWeapon(UABItemData* InItemData)
 
 		// 로드가 완료되면 메시 설정.
 		Weapon->SetSkeletalMesh(WeaponItemData->WeaponMesh.Get());
+
+		// 무기 아이템이 제공하는 부가 스탯 설정.
+		Stat->SetModifierStat(WeaponItemData->ModifierStat);
 	}
 }
 
