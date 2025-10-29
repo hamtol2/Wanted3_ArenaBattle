@@ -64,6 +64,10 @@ public:
 	// 캐릭터가 아이템을 습득했을 때 호출.
 	virtual void TakeItem(class UABItemData* InItemData) override;
 
+	// Stat 섹션.
+	int GetLevel() const;
+	void SetLevel(int32 InNewLevel);
+
 protected:
 
 	// 컨트롤 데이터 설정.

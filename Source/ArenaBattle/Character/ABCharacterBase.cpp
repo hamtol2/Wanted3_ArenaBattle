@@ -224,11 +224,12 @@ void AABCharacterBase::ComboActionBegin()
 	if (AnimInstance)
 	{
 		// 몽타주 재생 속도.
-		const float AttackSppedRate = 1.0f;
+		//const float AttackSpeedRate = 1.0f;
+		const float AttackSpeedRate = Stat->GetTotalStat().AttackSpeed;
 
 		// 몽타주 재생 함수.
 		AnimInstance->Montage_Play(
-			ComboActionMontage, AttackSppedRate
+			ComboActionMontage, AttackSpeedRate
 		);
 
 		// 몽타주 재생이 끝나면 이 클래스의 특정 함수를 실행.
@@ -280,7 +281,8 @@ void AABCharacterBase::SetComboCheckTimer()
 	// 왜? 타이머에 쓰려고.
 
 	// 애니메이션 재생 속도.
-	const float AttackSpeedRate = 1.0f;
+	//const float AttackSpeedRate = 1.0f;
+	const float AttackSpeedRate = Stat->GetTotalStat().AttackSpeed;
 	// 초 단위 시간 값 계산 (타이머에 설정할 값).
 	float ComboEffectTime =
 		(ComboActionData->EffectiveFrameCount[ComboIndex]
@@ -398,7 +400,8 @@ void AABCharacterBase::AttackHitCheck()
 		* GetCapsuleComponent()->GetScaledCapsuleRadius();
 
 	// 충돌 판정 종료 위치.
-	const float AttackRange = 50.0f;
+	//const float AttackRange = 50.0f;
+	const float AttackRange = Stat->GetTotalStat().AttackRange;
 	FVector End
 		= Start + GetActorForwardVector() * AttackRange;
 
@@ -430,7 +433,8 @@ void AABCharacterBase::AttackHitCheck()
 	if (HitDetected)
 	{
 		// 대미지 양.
-		const float AttackDamage = 30.0f;
+		//const float AttackDamage = 30.0f;
+		const float AttackDamage = Stat->GetTotalStat().Attack;
 
 		// 대미지 이벤트.
 		FDamageEvent DamageEvent;
@@ -478,12 +482,12 @@ void AABCharacterBase::SetupCharacterWidget(UABUserWidget* InUserWidget)
 	if (HpBarWidget)
 	{
 		// 스탯 데이터를 기반으로 위젯에 값 설정.
-		HpBarWidget->SetMaxHp(Stat->GetMaxHp());
+		HpBarWidget->SetMaxHp(Stat->GetTotalStat().MaxHp);
 		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
 
 		// 델리게이트 연결.
 		Stat->OnHpChanged.AddUObject(
-			HpBarWidget, 
+			HpBarWidget,
 			&UABHpBarWidget::UpdateHpBar
 		);
 	}
@@ -505,7 +509,7 @@ void AABCharacterBase::TakeItem(UABItemData* InItemData)
 		uint8 Index = (uint8)InItemData->Type;
 
 		// 호출할 델리게이트 가져오기.
-		FOnTakeItemDelegate Delegate 
+		FOnTakeItemDelegate Delegate
 			= TakeItemActions[Index].ItemDelegate;
 
 		// 델리게이트 호출.
@@ -542,4 +546,14 @@ void AABCharacterBase::EquipWeapon(UABItemData* InItemData)
 void AABCharacterBase::ReadScroll(UABItemData* InItemData)
 {
 	UE_LOG(LogTemp, Log, TEXT("Read Scroll"));
+}
+
+int AABCharacterBase::GetLevel() const
+{
+	return Stat->GetCurrentLevel();
+}
+
+void AABCharacterBase::SetLevel(int32 InNewLevel)
+{
+	Stat->SetLevelStat(InNewLevel);
 }
