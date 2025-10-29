@@ -48,6 +48,16 @@ public:
 	// Sets default values for this actor's properties
 	AABStageGimmick();
 
+	// Stage Stat.
+public:
+
+	// CurrentStageNum에 대핸 Getter/Setter.
+	FORCEINLINE int32 GetStageNum() const { return CurrentStageNum; }
+	FORCEINLINE void SetStageNum(int32 NewStageNum)
+	{ 
+		CurrentStageNum = NewStageNum;
+	}
+
 protected:
 
 	// 생성되는 과정에서 호출됨.
@@ -170,4 +180,10 @@ protected:
 	// 아이템 상자 생성 함수.
 	void SpawnRewardBoxes();
 
+	// Stage Stat.
+protected:
+
+	// 스테이트 순번을 레벨 값으로 관리.
+	UPROPERTY(VisibleInstanceOnly, Category = Stat, meta = (AllowPrivateAccess = "true"))
+	int32 CurrentStageNum;
 };
