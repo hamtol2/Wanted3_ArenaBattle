@@ -11,6 +11,7 @@ UABCharacterStatComponent::UABCharacterStatComponent()
 	//MaxHp = 200.0f;
 	//CurrentHp = MaxHp;
 	CurrentLevel = 1;
+	AttackRadius = 50.0f;
 }
 
 

@@ -406,7 +406,8 @@ void AABCharacterBase::AttackHitCheck()
 		= Start + GetActorForwardVector() * AttackRange;
 
 	// 트레이스에 사용할 반지름 값.
-	const float AttackRadius = 50.0f;
+	//const float AttackRadius = Stat->GetAttackRadius();
+	const float AttackRadius = Stat->GetAttackRadius();
 
 	// SCENE_QUERY_STAT-FName 타입의 태그값 생성 매크로(엔진 내부에서 사용).
 	// 두번째 인자: 복잡한 형태로 충돌체를 감지할지 여부 지정.

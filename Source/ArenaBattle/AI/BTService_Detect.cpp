@@ -6,6 +6,8 @@
 #include "Physics/ABCollision.h"
 #include "Interface/ABCharacterAIInterface.h"
 #include "Engine/OverlapResult.h"
+#include "ABAI.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 UBTService_Detect::UBTService_Detect()
 {
@@ -70,7 +72,75 @@ void UBTService_Detect::TickNode(
 	// 충돌 감지 됐을 때 처리.
 	if (Result)
 	{
+		for (const auto& OverlapResult : Results)
+		{
+			// 충돌 감지된 액터를 폰으로 변환.
+			APawn* Pawn
+				= Cast<APawn>(OverlapResult.GetActor());
 
+			// 감지된 액터가 폰이고,
+			// 해당 폰을 제어하는 컨트롤러가 플레이어 컨트롤러라면,
+			// 로직 진행.
+			// -> 플레이어 캐릭터인지 확인.
+			if (Pawn && Pawn->GetController()->IsPlayerController())
+			{
+				// 감지된 폰 정보를 블랙보드에 저장.
+				OwnerComp.GetBlackboardComponent()->SetValueAsObject(
+					BBKEY_TARGET,
+					Pawn
+				);
+
+				// 감지한 정보를 시각적으로 보여주기.
+				DrawDebugSphere(
+					World, 
+					Center, 
+					DetectRadius, 
+					16, 
+					FColor::Green, 
+					false, 
+					0.5f
+				);
+
+				// 감지된 지점(캐릭터 위치) 점으로 표시.
+				DrawDebugPoint(
+					World,
+					Pawn->GetActorLocation(),
+					10.0f,
+					FColor::Green,
+					false,
+					0.6f
+				);
+
+				// 감지된 방향을 선으로 표시.
+				DrawDebugLine(
+					World,
+					ControllingPawn->GetActorLocation(),
+					Pawn->GetActorLocation(),
+					FColor::Green,
+					false,
+					0.5f
+				);
+
+				return;
+			}
+		}
 	}
 
+	// 여기에 도달했다면, 플레이어 감지에 실패.
+	// 타겟 액터를 null로 저장.
+	OwnerComp.GetBlackboardComponent()->SetValueAsObject(
+		BBKEY_TARGET,
+		nullptr
+	);
+
+	// 감지 영역 빨간색으로 표시.
+	DrawDebugSphere(
+		World,
+		Center,
+		DetectRadius,
+		16,
+		FColor::Red,
+		false,
+		0.5f
+	);
 }

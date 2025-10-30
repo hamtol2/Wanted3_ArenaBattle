@@ -4,6 +4,7 @@
 #include "Character/ABCharacterNonPlayer.h"
 #include "Engine/AssetManager.h"
 #include "AI/ABAIController.h"
+#include "CharacterStat/ABCharacterStatComponent.h"
 
 AABCharacterNonPlayer::AABCharacterNonPlayer()
 {
@@ -93,12 +94,14 @@ float AABCharacterNonPlayer::GetAIPatrolRadius()
 
 float AABCharacterNonPlayer::GetAIDetectRange()
 {
-	return 0.0f;
+	return 400.0f;
 }
 
 float AABCharacterNonPlayer::GetAIAttackRange()
 {
-	return 0.0f;
+	// 캡슐 길이 구하는 공식.
+	return Stat->GetTotalStat().AttackRange 
+		+ Stat->GetAttackRadius() * 2;
 }
 
 float AABCharacterNonPlayer::GetAIAITurnSpeed()

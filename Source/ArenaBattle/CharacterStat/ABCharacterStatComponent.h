@@ -33,6 +33,7 @@ public:
 	//FORCEINLINE float GetMaxHp() const { return MaxHp; }
 	void SetLevelStat(int32 InNewLevel);
 	FORCEINLINE int32 GetCurrentLevel() const { return CurrentLevel; }
+	FORCEINLINE float GetAttackRadius() const { return AttackRadius; }
 	FORCEINLINE void SetModifierStat(const FABCharacterStat& InModifierStat)
 	{
 		ModifierStat = InModifierStat;
@@ -72,6 +73,10 @@ protected:
 	// 현재 레벨.
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)
 	int32 CurrentLevel;
+
+	// 공격 범위.
+	UPROPERTY(VisibleInstanceOnly, Category = Stat, meta = (AllowPrivateAccess = "true"))
+	float AttackRadius;
 
 	// 기본 스탯 데이터.
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat, meta = (AllowPrivateAccess = "true"))
