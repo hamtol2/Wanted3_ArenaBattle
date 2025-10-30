@@ -106,7 +106,7 @@ float AABCharacterNonPlayer::GetAIAttackRange()
 
 float AABCharacterNonPlayer::GetAIAITurnSpeed()
 {
-	return 0.0f;
+	return 2.0f;
 }
 
 void AABCharacterNonPlayer::AttackByAI()

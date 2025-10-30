@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,13 +7,28 @@
 #include "ABPlayerController.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
-class ARENABATTLE_API AABPlayerController : public APlayerController
+class ARENABATTLE_API AABPlayerController
+	: public APlayerController
 {
 	GENERATED_BODY()
-	
+
+public:
+	AABPlayerController();
+
 protected:
 	virtual void BeginPlay() override;
+
+	// HUD 섹션.
+protected:
+
+	// 생성할 위젯의 클래스.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HUD)
+	TSubclassOf<class UABHUDWidget> ABHUDWidgetClass;
+
+	// 생성된 위젯 객체.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD)
+	TObjectPtr<class UABHUDWidget> ABHUDWidget;
 };
