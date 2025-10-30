@@ -13,6 +13,9 @@ class UABCharacterAIInterface : public UInterface
 	GENERATED_BODY()
 };
 
+// 공격 종료 델리게이트 선언.
+DECLARE_DELEGATE(FAICharacterAttackFinished);
+
 /**
  * 
  */
@@ -28,4 +31,10 @@ public:
 	virtual float GetAIDetectRange() = 0;
 	virtual float GetAIAttackRange() = 0;
 	virtual float GetAIAITurnSpeed() = 0;
+	// NPC에 공격 요청하는 함수.
+	virtual void AttackByAI() = 0;
+	// 공격 종료 시점에 델리게이트 호출을 요청하는 ㅎ마수.
+	virtual void SetAIAttackDelegate(
+		const FAICharacterAttackFinished& InOnAttackFinished
+	) = 0;
 };

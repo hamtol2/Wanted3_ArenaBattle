@@ -96,6 +96,9 @@ protected:
 		UAnimMontage* TargetMontage, bool Interrupted
 	);
 
+	// NPC가 공격이 끝나는 지점을 알 수 있도록 가상 함수 추가.
+	virtual void NotifyComboActionEnd();
+
 	// 콤보 타이머 설정 함수.
 	void SetComboCheckTimer();
 

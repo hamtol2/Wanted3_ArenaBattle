@@ -264,6 +264,13 @@ void AABCharacterBase::ComboActionEnd(
 	GetCharacterMovement()->SetMovementMode(
 		EMovementMode::MOVE_Walking
 	);
+
+	// 공격이 끝나면 NotifyComboActionEnd 함수 호출.
+	NotifyComboActionEnd();
+}
+
+void AABCharacterBase::NotifyComboActionEnd()
+{
 }
 
 void AABCharacterBase::SetComboCheckTimer()
