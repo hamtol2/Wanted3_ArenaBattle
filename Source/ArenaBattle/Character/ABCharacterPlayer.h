@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Character/ABCharacterBase.h"
 #include "InputActionValue.h"
+#include "Interface/ABCharacterHUDInterface.h"
 #include "ABCharacterPlayer.generated.h"
 
 /**
@@ -12,7 +13,8 @@
  */
 UCLASS()
 class ARENABATTLE_API AABCharacterPlayer 
-	: public AABCharacterBase
+	: public AABCharacterBase,
+	public IABCharacterHUDInterface
 {
 	GENERATED_BODY()
 	
@@ -86,4 +88,10 @@ protected:
 	// 현재 사용 중인 캐릭터 컨트롤 타입 변수.
 	UPROPERTY(VisibleAnywhere, Category = CharacterControl, meta = (AllowPrivateAccess = "true"))
 	ECharacterControlType CurrentCharacterControlType;
+
+	// UI Section.
+protected:
+	// 캐릭터가 HUD 관련 설정을 진행할 때 사용할 함수 구현.
+	virtual void SetupHUDWidget(
+		class UABHUDWidget* InHUDWidget) override;
 };

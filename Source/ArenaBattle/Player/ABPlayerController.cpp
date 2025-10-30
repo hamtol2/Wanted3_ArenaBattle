@@ -32,5 +32,4 @@ void AABPlayerController::BeginPlay()
 	{
 		ABHUDWidget->AddToViewport();
 	}
-
 }

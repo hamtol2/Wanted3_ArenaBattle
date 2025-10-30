@@ -15,6 +15,9 @@
 
 #include "ABCharacterControlData.h"
 
+#include "UI/ABHUDWidget.h"
+#include "CharacterStat/ABCharacterStatComponent.h"
+
 AABCharacterPlayer::AABCharacterPlayer()
 {
 	// 기본 컴포넌트 설정.
@@ -320,4 +323,31 @@ void AABCharacterPlayer::QuaterMove(const FInputActionValue& Value)
 void AABCharacterPlayer::Attack()
 {
 	ProcessComboCommand();
+}
+
+void AABCharacterPlayer::SetupHUDWidget(
+	UABHUDWidget* InHUDWidget)
+{
+	if (InHUDWidget)
+	{
+		// HUD에 기본 스탯 정보 설정.
+		InHUDWidget->UpdateStat(
+			Stat->GetBaseStat(),
+			Stat->GetModifierStat()
+		);
+
+		// HP 정보 설정.
+		InHUDWidget->UpdateHpBar(Stat->GetCurrentHp());
+
+		// 스탯 변경 델리게이트에 연결(바인딩).
+		Stat->OnStatChanged.AddUObject(
+			InHUDWidget,
+			&UABHUDWidget::UpdateStat
+		);
+		// HP 변경 델리게이트에 연결(바인딩).
+		Stat->OnHpChanged.AddUObject(
+			InHUDWidget,
+			&UABHUDWidget::UpdateHpBar
+		);
+	}
 }

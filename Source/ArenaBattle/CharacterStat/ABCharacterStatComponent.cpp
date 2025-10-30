@@ -12,16 +12,15 @@ UABCharacterStatComponent::UABCharacterStatComponent()
 	//CurrentHp = MaxHp;
 	CurrentLevel = 1;
 	AttackRadius = 50.0f;
+
+	// InitializeComponent() 함수는 요청이 있을 때만 호출됨.
+	// 필요하지 않은 경우에는 호출 안되도록 설계됨.
+	bWantsInitializeComponent = true;
 }
 
-
-// Called when the game starts
-void UABCharacterStatComponent::BeginPlay()
+void UABCharacterStatComponent::InitializeComponent()
 {
-	Super::BeginPlay();
-
-	// ...
-	//CurrentHp = MaxHp;
+	Super::InitializeComponent();
 
 	// 기본 스탯 데이터 로드.
 	SetLevelStat(CurrentLevel);
@@ -40,8 +39,8 @@ void UABCharacterStatComponent::SetLevelStat(int32 InNewLevel)
 	);
 
 	// 데이터 싱글톤에 접근해서 레벨에 맞는 스탯 데이터 로드.
-	BaseStat 
-		= UABGameSingleton::Get().GetCharacterStat(CurrentLevel);
+	//BaseStat = UABGameSingleton::Get().GetCharacterStat(CurrentLevel);
+	SetBaseStat(UABGameSingleton::Get().GetCharacterStat(CurrentLevel));
 
 	// 확인.
 	ensureAlways(BaseStat.MaxHp > 0.0f);
