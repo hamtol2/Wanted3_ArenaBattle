@@ -14,7 +14,8 @@
 
 #include "UI/ABHpBarWidget.h"
 #include "Item/ABItemData.h"
-#include "Item/ABWeaponItemData.h"
+//#include "Item/ABWeaponItemData.h"
+#include "Item/ABItems.h"
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
@@ -150,6 +151,12 @@ void AABCharacterBase::PostInitializeComponents()
 
 	// 체력을 모두 소진했을 때 발행되는 델리게이트에 구독.
 	Stat->OnHpZero.AddUObject(this, &AABCharacterBase::SetDead);
+
+	// 스탯이 변경됐을 때 발행되는 델리게이트에 구독.
+	Stat->OnStatChanged.AddUObject(
+		this, 
+		&AABCharacterBase::ApplyStat
+	);
 }
 
 void AABCharacterBase::SetCharacterControlData(
@@ -567,4 +574,16 @@ int AABCharacterBase::GetLevel() const
 void AABCharacterBase::SetLevel(int32 InNewLevel)
 {
 	Stat->SetLevelStat(InNewLevel);
+}
+
+void AABCharacterBase::ApplyStat(
+	const FABCharacterStat& BaseStat, 
+	const FABCharacterStat& ModifierStat)
+{
+	// 스탯 데이터에서 최종 이동 속력 구하기.
+	float MovementSpeed
+		= (BaseStat + ModifierStat).MovementSpeed;
+
+	// 이동 속력을 캐릭터 무브먼트 컴포넌트에 적용.
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 }

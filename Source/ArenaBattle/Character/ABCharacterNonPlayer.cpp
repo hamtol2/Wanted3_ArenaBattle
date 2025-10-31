@@ -44,6 +44,14 @@ void AABCharacterNonPlayer::SetDead()
 {
 	Super::SetDead();
 
+	// AI 로직 정지 처리.
+	AABAIController* ABAIController 
+		= Cast<AABAIController>(GetController());
+	if (ABAIController)
+	{
+		ABAIController->StopAI();
+	}
+
 	// 시간 대기에 사용될 타이머 핸들.
 	FTimerHandle DeadTimerHandle;
 

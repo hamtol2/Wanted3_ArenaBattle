@@ -5,29 +5,25 @@
 #include "CoreMinimal.h"
 #include "Item/ABItemData.h"
 #include "GameData/ABCharacterStat.h"
-#include "ABWeaponItemData.generated.h"
+#include "ABScrollItemData.generated.h"
 
 /**
- * Ctrl+K, Ctrl+O.
+ * 
  */
 UCLASS()
-class ARENABATTLE_API UABWeaponItemData : public UABItemData
+class ARENABATTLE_API UABScrollItemData : public UABItemData
 {
 	GENERATED_BODY()
 	
 public:
-	UABWeaponItemData();
+	UABScrollItemData();
 
 	virtual FPrimaryAssetId GetPrimaryAssetId() const override
 	{
 		return FPrimaryAssetId("ABItemData", GetFName());
 	}
 
-	UPROPERTY(EditAnywhere, Category = Weapon)
-	TSoftObjectPtr<class USkeletalMesh> WeaponMesh;
-	//TObjectPtr<class USkeletalMesh> WeaponMesh;
-
-	// 무기 아이템이 제공하는 부가 스탯 데이터.
+	// 스탯.
 	UPROPERTY(EditAnywhere, Category = Stat)
-	FABCharacterStat ModifierStat;
+	FABCharacterStat BaseStat;
 };

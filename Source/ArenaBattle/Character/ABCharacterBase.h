@@ -7,6 +7,7 @@
 #include "Interface/ABAnimationAttackInterface.h"
 #include "Interface/ABCharacterWidgetInterface.h"
 #include "Interface/ABCharacterItemInterface.h"
+#include "GameData/ABCharacterStat.h"
 #include "ABCharacterBase.generated.h"
 
 // 캐릭터 컨트롤 타입을 지정하는 열거형.
@@ -67,6 +68,12 @@ public:
 	// Stat 섹션.
 	int GetLevel() const;
 	void SetLevel(int32 InNewLevel);
+
+	// 스탯이 변경됐을 때 델리게이트에 연결해 실행할 함수.
+	void ApplyStat(
+		const FABCharacterStat& BaseStat,
+		const FABCharacterStat& ModifierStat
+	);
 
 protected:
 
