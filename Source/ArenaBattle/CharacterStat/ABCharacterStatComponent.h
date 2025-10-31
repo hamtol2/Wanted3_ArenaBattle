@@ -50,6 +50,14 @@ public:
 		return BaseStat;
 	}
 
+	// 스탯 추가 함수.
+	FORCEINLINE void AddBaseStat(
+		const FABCharacterStat& InBaseStat)
+	{
+		BaseStat = BaseStat + InBaseStat;
+		OnStatChanged.Broadcast(BaseStat, ModifierStat);
+	}
+
 	FORCEINLINE void SetBaseStat(
 		const FABCharacterStat& InBaseStat)
 	{
@@ -70,6 +78,19 @@ public:
 	}
 
 	FORCEINLINE float GetCurrentHp() const { return CurrentHp; }
+	// 체력 회복 함수.
+	FORCEINLINE void HealHp(float InHealAmount)
+	{
+		// 체력 회복 설정 (유효한 범위의 값으로 가두기).
+		CurrentHp = FMath::Clamp(
+			CurrentHp + InHealAmount,
+			0.0f,
+			GetTotalStat().MaxHp
+		);
+
+		// 체력 변경 이벤트 발행.
+		OnHpChanged.Broadcast(CurrentHp);
+	}
 
 
 	// 대미지 적용 함수.

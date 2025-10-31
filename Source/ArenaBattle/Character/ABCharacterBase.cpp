@@ -24,6 +24,8 @@ AABCharacterBase::AABCharacterBase()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// 컴포넌트 설정.
+	GetCharacterMovement()->MaxWalkSpeed = 400.0f;
+
 	GetCapsuleComponent()->SetCollisionProfileName(CPROPILE_ABCAPSULE);
 
 	// 메시의 콜리전은 NoCollision으로 설정.
@@ -497,13 +499,22 @@ void AABCharacterBase::SetupCharacterWidget(UABUserWidget* InUserWidget)
 	if (HpBarWidget)
 	{
 		// 스탯 데이터를 기반으로 위젯에 값 설정.
-		HpBarWidget->SetMaxHp(Stat->GetTotalStat().MaxHp);
+		//HpBarWidget->SetMaxHp(Stat->GetTotalStat().MaxHp);
+		HpBarWidget->UpdateStat(
+			Stat->GetBaseStat(),
+			Stat->GetModifierStat()
+		);
 		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
 
 		// 델리게이트 연결.
 		Stat->OnHpChanged.AddUObject(
 			HpBarWidget,
 			&UABHpBarWidget::UpdateHpBar
+		);
+
+		Stat->OnStatChanged.AddUObject(
+			HpBarWidget,
+			&UABHpBarWidget::UpdateStat
 		);
 	}
 }
@@ -534,7 +545,15 @@ void AABCharacterBase::TakeItem(UABItemData* InItemData)
 
 void AABCharacterBase::DrinkPotion(UABItemData* InItemData)
 {
-	UE_LOG(LogTemp, Log, TEXT("Drink Potion"));
+	//UE_LOG(LogTemp, Log, TEXT("Drink Potion"));
+
+	// 처리를 위해 포션 아이템 데이터로 변환 후 체력 회복 요청.
+	UABPotionItemData* PotionItemData
+		= Cast<UABPotionItemData>(InItemData);
+	if (PotionItemData)
+	{
+		Stat->HealHp(PotionItemData->HealAmount);
+	}
 }
 
 void AABCharacterBase::EquipWeapon(UABItemData* InItemData)
@@ -563,7 +582,15 @@ void AABCharacterBase::EquipWeapon(UABItemData* InItemData)
 
 void AABCharacterBase::ReadScroll(UABItemData* InItemData)
 {
-	UE_LOG(LogTemp, Log, TEXT("Read Scroll"));
+	//UE_LOG(LogTemp, Log, TEXT("Read Scroll"));
+
+	// 스크롤 아이템 타입으로 형변환 후 처리 요청.
+	UABScrollItemData* ScollItemData
+		= Cast<UABScrollItemData>(InItemData);
+	if (ScollItemData)
+	{
+		Stat->AddBaseStat(ScollItemData->BaseStat);
+	}
 }
 
 int AABCharacterBase::GetLevel() const

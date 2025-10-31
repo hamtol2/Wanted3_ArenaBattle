@@ -54,9 +54,10 @@ void UABHUDWidget::UpdateStat(
 	// 최종 스탯 계산.
 	FABCharacterStat TotalStat
 		= BaseStat + ModifierStat;
-	
+
 	// HpBar 업데이트.
-	HpBar->SetMaxHp(TotalStat.MaxHp);
+	//HpBar->SetMaxHp(TotalStat.MaxHp);
+	HpBar->UpdateStat(BaseStat, ModifierStat);
 
 	// 캐릭터 스탯 UI에 새 데이터 전달.
 	CharacterStat->UpdateStat(BaseStat, ModifierStat);
